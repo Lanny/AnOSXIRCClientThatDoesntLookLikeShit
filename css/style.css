@@ -1,0 +1,92 @@
+@font-face {
+  font-family: "Source Code";
+  src: url("../font/SourceCodePro-Regular.otf");
+}
+
+@font-face {
+  font-family: "Source Code";
+  src: url("../font/SourceCodePro-Light.otf");
+  font-weight: 200;
+}
+
+@font-face {
+  font-family: "Source Code";
+  src: url("../font/SourceCodePro-Semibold.otf");
+  font-weight: 600;
+}
+
+body {
+  height: 100%;
+  position: absolute;
+  width: 100%;
+  margin: 0;
+  color: #F0F1F1;
+}
+
+ul {
+  list-style: none;
+  padding-left: 1rem;
+}
+
+#networks-pane {
+  padding-top: .5rem;
+  padding-bottom: .5rem;
+  box-sizing: border-box;
+  float: left;
+  height: 100%;
+  width: 10rem;
+  position: relative;
+}
+
+#context-area {
+  overflow: hidden;
+  height: 100%;
+  padding: .5rem;
+  box-sizing: border-box;
+}
+
+#not-users {
+  height: 100%;
+}
+
+#messages {
+  /* I have literally been waiting a decade for clac. This is better than sex */
+  height: calc(100% - 3rem);
+  margin-bottom: .5rem;
+  overflow: auto;
+}
+
+#user-input {
+  width: 100%;
+  height: 2.5rem;
+  padding: .65rem;
+}
+
+.message-line {
+  margin: 0;
+  font-family: "Source Code";
+}
+
+.channel-list {
+  margin-bottom: 1rem;
+}
+
+.seperator {
+  background-color: #58595A;
+  position: absolute;
+}
+
+.seperator.right {
+  top: 20px;
+  bottom: 20px;
+  right: 0;
+  width: 1px;
+}
+
+.label-text {
+  color: #A0A7AF;
+  padding-bottom: .1rem;
+  margin-left: 1rem;
+  padding-right: 1rem;
+  border-bottom: 1px solid #58595A;
+}
