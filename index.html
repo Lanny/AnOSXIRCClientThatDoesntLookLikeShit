@@ -11,9 +11,12 @@
       <span class="label-text">Networks</span>
       <ul id="network-list" data-bind="foreach: $root.networks">
         <li>
-          <span data-bind="text: name"></span>
+          <span data-bind="text: name, 
+                           click: $root.setActiveTab"></span>
           <ul data-bind="foreach: channels" class="channel-list">
-            <li data-bind="text: name"></li>
+            <li class="tab-name"
+                data-bind="text: name, click: $root.setActiveTab">
+            </li>
           </ul>
         </li>
       </ul>

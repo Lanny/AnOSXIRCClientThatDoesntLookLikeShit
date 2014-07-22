@@ -1,4 +1,4 @@
-var root;
+var root
 
 ;(function() {
   var irc = require('irc')
@@ -47,6 +47,10 @@ var root;
       } else if (match = line.match(/^\/nick (\S+)$/)) {
         this.defaultNick = match[1]
       }
+    },
+    setActiveTab: function(tab) {
+      console.log(this)
+      root.activeTab(tab)
     }
   }
 
@@ -68,8 +72,9 @@ var root;
     self.client.on('raw', function(e) { console.log(e) })
   }
   NetworkMVM.prototype = {
-    join: function(channel) {
-      this.client.join(channel)
+    join: function(channelName) {
+      var channel = new ChannelMVM(this, channelName)
+      this.channels.push(channel)
     },
     send: function(line) {
       var match = null
@@ -93,29 +98,28 @@ var root;
       })
     },
     onJoin: function(channel, nick, message) {
-      console.log(message)
+      console.log(channel, nick, message)
     }
   }
 
-  function ChannelMVM(client, options) {
+  function ChannelMVM(network, name) {
     var self = this
     self.lines = ko.observableArray()
     self.users = ko.observableArray()
-    self.name = ko.observable(options.channel)
+    self.name = ko.observable(name)
+    self.network = network
 
-    self.channel = client.channel(options.channel)
+    network.client.join(name)
+
+    network.client.on('message' + name, ensureMethod(self, 'onChanMessage'))
   }
   ChannelMVM.prototype = {
-    onMessage: function(message) {
-      this.messages.push(message)
-      console.log(message)
-    },
-    formatForDisplay: function(message) {
-      return {
-        left: message.nickname,
-        right: message.text,
+    onChanMessage: function(nick, text, message) {
+      this.lines.push({
+        left: nick,
+        right: text,
         lineClass: 'message'
-      }
+      })
     }
   }
 

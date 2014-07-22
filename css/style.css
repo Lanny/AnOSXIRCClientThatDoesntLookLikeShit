@@ -60,6 +60,7 @@ ul {
   width: 100%;
   height: 2.5rem;
   padding: .65rem;
+  overflow: hidden;
 }
 
 .message-line {
