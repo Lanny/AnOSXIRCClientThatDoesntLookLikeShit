@@ -15,6 +15,9 @@ var root
     self.input = ko.observable()
     self.defaultNick = "mibiot"
 
+    self.inputHistory = JSON.parse(window.localStorage.inputHistory || "[]")
+    self.inputHistoryPoint = -1
+
     // A "tab" can be a network, channel, or null when none of either are 
     // available.
     self.activeTab = ko.observable(self)
@@ -27,8 +30,30 @@ var root
     },
     lineSubmit: function(_, e) {
       if (e.keyCode == 13) {
-        this.activeTab().send(this.input())
+        var line = this.input()
+        this.activeTab().send(line)
+
+        this.inputHistory.unshift(line)
+        this.inputHistory.splice(50) // Keep 50 lines
+        this.inputHistoryPoint = -1
+        window.localStorage.inputHistory = JSON.stringify(this.inputHistory)
+
         this.input('')
+      } else if (e.keyCode == 38) {
+        // Up arrow
+        this.inputHistoryPoint++
+        if (this.inputHistoryPoint >= this.inputHistory.length) {
+          this.inputHistoryPoint--
+        }
+        this.input(this.inputHistory[this.inputHistoryPoint])
+      } else if (e.keyCode == 40) {
+        // Down arrow
+        this.inputHistoryPoint--
+        if (this.inputHistoryPoint < 0) {
+          this.inputHistoryPoint = -1
+        } else {
+          this.input(this.inputHistory[this.inputHistoryPoint])
+        }
       } else {
         return true
       }
