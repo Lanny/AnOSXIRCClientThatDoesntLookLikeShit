@@ -25,13 +25,13 @@
       <div id="not-users">
         <div id="messages" class="topcoat-textarea" 
              data-bind="with: activeTab">
-           <table>
+           <table id="message-table">
              <tbody data-bind="foreach: $data.lines">
                <tr data-bind="css: $data.lineClass">
                  <td data-bind="text: $data.left"></td>
                  <td>
-                   <pre class="message-line" 
-                        data-bind="text: $data.right"></pre>
+                   <span class="message-line" 
+                         data-bind="text: $data.right"></span>
                  </td>
                </tr>
              </tbody>
