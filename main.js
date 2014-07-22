@@ -99,6 +99,7 @@ var root
   NetworkMVM.prototype = {
     join: function(channelName) {
       var channel = new ChannelMVM(this, channelName)
+      root.activeTab(channel)
       this.channels.push(channel)
     },
     send: function(line) {
