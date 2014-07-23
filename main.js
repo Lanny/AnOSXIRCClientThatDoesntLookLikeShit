@@ -13,6 +13,7 @@ var root
     var self = this
     self.networks = ko.observableArray()
     self.input = ko.observable()
+    self.lines = ko.observableArray()
     self.defaultNick = "mibiot"
 
     self.inputHistory = JSON.parse(window.localStorage.inputHistory || "[]")
@@ -21,6 +22,8 @@ var root
     // A "tab" can be a network, channel, or null when none of either are 
     // available.
     self.activeTab = ko.observable(self)
+
+
   }
   WindowMVM.prototype = {
     connect: function(options) {
@@ -76,6 +79,12 @@ var root
     setActiveTab: function(tab) {
       console.log(this)
       root.activeTab(tab)
+    },
+    scrollDown: function(el, _, data) {
+      var messageTable = document.getElementById('message-table'),
+        messageContainer = document.getElementById('messages')
+
+      messageContainer.scrollTop = (messageTable.offsetHeight + 100)
     }
   }
 
@@ -83,6 +92,7 @@ var root
     var self = this
     self.channels = ko.observableArray()
     self.lines = ko.observableArray()
+    self.nick = ko.observable(options.nick)
 
     var n = options.host.split('.')
     while (n.length > 2) n.shift()
@@ -146,6 +156,24 @@ var root
         right: text,
         lineClass: 'message'
       })
+    },
+    send: function(line) {
+      var match = null
+
+      if (match = line.match(/^\/.*/)) {
+        this.lines.push({
+          left: '*',
+          right: 'Not a recognized command!',
+          lineClass: 'error'
+        })
+      } else {
+        this.lines.push({
+          left: this.network.nick(),
+          right: line,
+          lineClass: 'message self-message'
+        })
+        this.network.client.say(this.name(), line)
+      }
     }
   }
 

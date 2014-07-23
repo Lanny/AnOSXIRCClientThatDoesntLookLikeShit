@@ -26,7 +26,8 @@
         <div id="messages" class="topcoat-textarea" 
              data-bind="with: activeTab">
            <table id="message-table">
-             <tbody data-bind="foreach: $data.lines">
+             <tbody data-bind="foreach: {data: $data.lines,
+                                         afterAdd: $root.scrollDown}">
                <tr data-bind="css: $data.lineClass">
                  <td data-bind="text: $data.left"></td>
                  <td>
