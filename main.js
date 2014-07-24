@@ -1,12 +1,44 @@
 var root
 
 ;(function() {
-  var irc = require('irc')
+  var irc = require('irc'),
+    VERSION = '0.0.1',
+    STATUS_POWER_RANKINGS = {
+      '@': 0,
+      '+': 1,
+      '': 2
+    }
 
   function ensureMethod(obj, attr) {
     // Returns a function that, when called, arrangeds for obj.attr to be 
     // called with the same args where `this` refers to obj
     return (function() { return obj[attr].apply(obj, arguments) })
+  }
+
+  function extend(m1, m2) {
+    // WARNING: shallow
+    var clone = {}
+    for (k in m1) { clone[k] = m1[k] }
+    for (k in m2) { clone[k] = m2[k] }
+
+    return clone
+  }
+
+  function only() {
+    var clone = {},
+      base = arguments[0]
+
+    for (var i=1; i<arguments.length; i++) {
+      clone[arguments[i]] = base[arguments[i]]
+    }
+
+    return clone
+  }
+
+  function getChan(network, chanName) {
+    return (network.channels().filter(function(e) {
+      return e.name() == chanName
+    })[0] || null)
   }
 
   function WindowMVM() {
@@ -22,12 +54,10 @@ var root
     // A "tab" can be a network, channel, or null when none of either are 
     // available.
     self.activeTab = ko.observable(self)
-
-
   }
   WindowMVM.prototype = {
     connect: function(options) {
-      var network = new NetworkMVM(options)
+      var network = new NetworkMVM(this, options)
       this.networks.push(network)
       this.activeTab(network)
     },
@@ -88,8 +118,9 @@ var root
     }
   }
 
-  function NetworkMVM(options) {
+  function NetworkMVM(windowModel, options) {
     var self = this
+    self.windowModel = windowModel
     self.channels = ko.observableArray()
     self.lines = ko.observableArray()
     self.nick = ko.observable(options.nick)
@@ -104,6 +135,9 @@ var root
     self.client.on('notice', ensureMethod(self, 'onNotice'))
     self.client.on('motd', ensureMethod(self, 'onMotd'))
     self.client.on('join', ensureMethod(self, 'onJoin'))
+    self.client.on('part', ensureMethod(self, 'onPart'))
+    self.client.on('names', ensureMethod(self, 'onNames'))
+    self.client.on('ctcp-version', ensureMethod(self, 'onVersion'))
     self.client.on('raw', function(e) { console.log(e) })
   }
   NetworkMVM.prototype = {
@@ -118,6 +152,19 @@ var root
       if (match = line.match(/^\/join (\S+)/)) {
         this.join(match[1])
       }
+    },
+    onNames: function(channel, nicks) {
+      var chan = getChan(this, channel),
+        nickArr = []
+
+      for (nick in nicks) {
+        nickArr.push({
+          name: nick,
+          status: nicks[nick]
+        })
+      }
+
+      chan.users(nickArr)
     },
     onNotice: function(nick, to, text, e) {
       this.lines.push({
@@ -134,7 +181,52 @@ var root
       })
     },
     onJoin: function(channel, nick, message) {
-      console.log(channel, nick, message)
+      var chan = getChan(this, channel)
+
+      if (nick == this.nick()) {
+        chan.lines.push({
+          left: '*',
+          right: 'You\'ve joined ' + channel,
+          lineClass: 'notice join'
+        })
+      } else {
+        chan.users.push({
+          status: '',
+          name: nick
+        })
+        chan.lines.push({
+          left: '*',
+          right: nick + ' has joined ' + channel,
+          lineClass: 'noitce join'
+        })
+      }
+    },
+    onPart: function(channel, nick, reason, message) {
+      var chan = getChan(this, channel)
+
+      if (nick == this.nick()) {
+        this.channels.remove(function(e) { return e.name == channel })
+      } else {
+        chan.users.remove(function(e) {
+          return e.name == nick
+        })
+
+        chan.lines.push({
+          left: '*',
+          right: nick + ' has quit (' + reason + ')',
+          lineClass: 'notice part'
+        })
+      }
+    },
+    onVersion: function(from, to, message) {
+      this.windowModel.activeTab().lines.push({
+        left: '*',
+        right: from + ' asked for a CTCP version on you',
+        lineClass: 'notice version'
+      })
+
+      this.client.ctcp(from, 'VERSION', 'AOICTDLLS (An OSX IRC Client That '
+        + 'Doesn\'t Look Like Shit) ' + VERSION)
     }
   }
 
@@ -144,6 +236,12 @@ var root
     self.users = ko.observableArray()
     self.name = ko.observable(name)
     self.network = network
+
+    self.sortedUsers = ko.computed(function() {
+      return self.users().sort(function(a, b) {
+        return STATUS_POWER_RANKINGS[a.status] - STATUS_POWER_RANKINGS[b.status]
+      })
+    })
 
     network.client.join(name)
 

@@ -45,7 +45,16 @@
                     class="topcoat-textarea"></textarea>
         </div>
       </div>
-      <div id="users-pane">
+      <div id="users-pane" class="topcoat-textarea">
+        <ul id="users-list"
+            data-bind="foreach: ko.unwrap($root.activeTab().sortedUsers || [])">
+          <li>
+            <span class="status-sym"
+                  data-bind="text: status"></span>
+            <span class=""
+                  data-bind="text: name"></span>
+          </li>
+        </ul>
       </div>
     </div>
     <script src="knockout.js" type="text/javascript"></script>
