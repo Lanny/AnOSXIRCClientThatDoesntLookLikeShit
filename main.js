@@ -11,7 +11,7 @@ var root
     }
 
   function ensureMethod(obj, attr) {
-    // Returns a function that, when called, arrangeds for obj.attr to be 
+    // Returns a function that, when called, arranges for obj.attr to be 
     // called with the same args where `this` refers to obj
     return (function() { return obj[attr].apply(obj, arguments) })
   }
@@ -42,6 +42,27 @@ var root
     })[0] || null)
   }
 
+  function universalSend(line, cascaded) {
+    // Dispatch submitted command to each level of the IRC hierarchy starting
+    // with the window (which has zero or more connected networks) and 
+    // executing this first command the submitted line matches (e.x. if both
+    // the channel and network match `/join #foo` then the network handler will
+    // be the one executed)
+    if (this.parentLevel) {
+      this.parentLevel.send(line, true)
+    }
+
+    var match = null
+
+    for (var i=0; i<this.commands.length; i++) {
+      var command = this.commands[i]
+      match = line.match(command.pattern)
+      if (match) {
+        return command.exec.call(this, match, line)
+      }
+    }
+  }
+
   function WindowMVM() {
     var self = this
     self.networks = ko.observableArray()
@@ -49,6 +70,7 @@ var root
     self.lines = ko.observableArray()
     self.activeTabTitle = ko.observable('Not Connected')
     self.defaultNick = "mibiot"
+    self.parentLevel = null
 
     self.inputHistory = JSON.parse(window.localStorage.inputHistory || "[]")
     self.inputHistoryPoint = -1
@@ -93,21 +115,19 @@ var root
         return true
       }
     },
-    send: function(line) {
-      var match = null
+    commands: [
+      {pattern: /^\/connect (\S+) ?(\d+)?/,
+       exec: function(match, line) {
+         var opts = {
+           host: match[1],
+           port: parseInt(match[2] | '6667'),
+           nick: this.defaultNick
+         }
 
-      if (match = line.match(/^\/connect (\S+) ?(\d+)?/)) {
-        var opts = {
-          host: match[1],
-          port: parseInt(match[2] | '6667'),
-          nick: this.defaultNick
-        }
-
-        this.connect(opts)
-      } else if (match = line.match(/^\/nick (\S+)$/)) {
-        this.defaultNick = match[1]
-      }
-    },
+         this.connect(opts)
+       }}
+    ],
+    send: universalSend,
     setActiveTab: function(tab) {
       console.log(this)
       root.activeTab(tab)
@@ -147,6 +167,7 @@ var root
     self.channels = ko.observableArray()
     self.lines = ko.observableArray()
     self.nick = ko.observable(options.nick)
+    self.parentLevel = windowModel
 
     var n = options.host.split('.')
     while (n.length > 2) n.shift()
@@ -171,13 +192,13 @@ var root
       root.activeTab(channel)
       this.channels.push(channel)
     },
-    send: function(line) {
-      var match = null
-
-      if (match = line.match(/^\/join (\S+)/)) {
-        this.join(match[1])
-      }
-    },
+    send: universalSend,
+    commands: [
+      {pattern: /^\/join (\S+)/,
+       exec: function(match, line) {
+         this.join(match[1])
+       }}
+    ],
     onNames: function(channel, nicks) {
       var chan = getChan(this, channel),
         nickArr = []
@@ -262,6 +283,7 @@ var root
     self.name = ko.observable(name)
     self.network = network
     self.activeTabTitle = self.name
+    self.parentLevel = network
 
     self.sortedUsers = ko.computed(function() {
       return self.users().sort(function(a, b) {
@@ -281,24 +303,26 @@ var root
         lineClass: 'message'
       })
     },
-    send: function(line) {
-      var match = null
-
-      if (match = line.match(/^\/.*/)) {
+    send: universalSend,
+    commands: [
+      {pattern: /^\/.*/,
+       exec: function(match, line) {
         this.lines.push({
           left: '*',
           right: 'Not a recognized command!',
           lineClass: 'error'
         })
-      } else {
-        this.lines.push({
-          left: this.network.nick(),
-          right: line,
-          lineClass: 'message self-message'
-        })
-        this.network.client.say(this.name(), line)
-      }
-    }
+       }},
+      {pattern: /.+/,
+       exec: function(match, line) {
+         this.lines.push({
+           left: this.network.nick(),
+           right: line,
+           lineClass: 'message self-message'
+         })
+         this.network.client.say(this.name(), line)
+       }}
+    ]
   }
 
   root = new WindowMVM()
