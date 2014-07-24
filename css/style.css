@@ -168,9 +168,11 @@ ul {
 
 .message-line {
   margin: 0;
-  /*
+  display: block;
+}
+.message-line.multi-line {
   font-family: "Source Code";
-  */
+  white-space: pre-wrap;
 }
 
 .channel-list {

@@ -184,7 +184,13 @@ var root
     self.client.on('part', ensureMethod(self, 'onPart'))
     self.client.on('names', ensureMethod(self, 'onNames'))
     self.client.on('ctcp-version', ensureMethod(self, 'onVersion'))
-    self.client.on('raw', function(e) { console.log(e) })
+    self.client.on('raw', function(e) { 
+      try {
+        console.log(e)
+      } catch (e) {
+        alert("wtf mate?" + console)
+      } 
+    })
   }
   NetworkMVM.prototype = {
     join: function(channelName) {

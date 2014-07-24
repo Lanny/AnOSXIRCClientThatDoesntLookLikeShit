@@ -8,7 +8,7 @@
     "width": 1000,
     "height": 600,
     "toolbar": true,
-    "frame": false
+    "frame": true
   }
 }
 

@@ -42,8 +42,10 @@
                  <tr data-bind="css: $data.lineClass">
                    <td data-bind="text: $data.left"></td>
                    <td>
-                     <span class="message-line" 
-                           data-bind="text: $data.right"></span>
+                     <span class="message-line"
+                           data-bind="text: $data.right,
+                                      css: {'multi-line': $data.right.indexOf('\n') != -1}">
+                     </span>
                    </td>
                  </tr>
                </tbody>
