@@ -5,8 +5,10 @@
     "irc": "0.3.7"
   },
   "window": {
-    "width": 800,
-    "height": 600
+    "width": 1000,
+    "height": 600,
+    "toolbar": true,
+    "frame": false
   }
 }
 

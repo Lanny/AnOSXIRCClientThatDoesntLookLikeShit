@@ -7,54 +7,66 @@
     <link href="css/style.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
-    <div id="networks-pane">
-      <span class="label-text">Networks</span>
-      <ul id="network-list" data-bind="foreach: $root.networks">
-        <li>
-          <span data-bind="text: name, 
-                           click: $root.setActiveTab"></span>
-          <ul data-bind="foreach: channels" class="channel-list">
-            <li class="tab-name"
-                data-bind="text: name, click: $root.setActiveTab">
-            </li>
-          </ul>
-        </li>
-      </ul>
+    <div id="faux-title-bar"
+         data-bind="event: {mousedown: $root.startWindowDrag,
+                            mouseup: $root.endWindowDrag}">
+        <div class="os-button close" data-bind="click: $root.close"></div>
+        <div class="os-button minimize" data-bind="click: $root.min"></div>
+        <div class="os-button maximize" data-bind="click: $root.max"></div>
+      <h1 id="window-title"
+          data-bind="text: 'AOICTDLLS - ' + activeTab().activeTabTitle()">
+      </h1>
     </div>
-    <div id="context-area">
-      <div id="not-users">
-        <div id="messages" class="topcoat-textarea" 
-             data-bind="with: activeTab">
-           <table id="message-table">
-             <tbody data-bind="foreach: {data: $data.lines,
-                                         afterAdd: $root.scrollDown}">
-               <tr data-bind="css: $data.lineClass">
-                 <td data-bind="text: $data.left"></td>
-                 <td>
-                   <span class="message-line" 
-                         data-bind="text: $data.right"></span>
-                 </td>
-               </tr>
-             </tbody>
-           </table>
-        </div>
-        <div id="user-input-pane">
-          <textarea id="user-input"
-                    data-bind="event: { 'keydown': lineSubmit },
-                               value: input, valueUpdate: 'keyup'"
-                    class="topcoat-textarea"></textarea>
-        </div>
-      </div>
-      <div id="users-pane" class="topcoat-textarea">
-        <ul id="users-list"
-            data-bind="foreach: ko.unwrap($root.activeTab().sortedUsers || [])">
+    <div id="content-wrapper">
+      <div id="networks-pane">
+        <span class="label-text">Networks</span>
+        <ul id="network-list" data-bind="foreach: $root.networks">
           <li>
-            <span class="status-sym"
-                  data-bind="text: status"></span>
-            <span class=""
-                  data-bind="text: name"></span>
+            <span data-bind="text: name, 
+                             click: $root.setActiveTab"></span>
+            <ul data-bind="foreach: channels" class="channel-list">
+              <li class="tab-name"
+                  data-bind="text: name, click: $root.setActiveTab">
+              </li>
+            </ul>
           </li>
         </ul>
+      </div>
+      <div id="context-area">
+        <div id="not-users">
+          <div id="messages" class="topcoat-textarea" 
+               data-bind="with: activeTab">
+             <table id="message-table">
+               <tbody data-bind="foreach: {data: $data.lines,
+                                           afterAdd: $root.scrollDown}">
+                 <tr data-bind="css: $data.lineClass">
+                   <td data-bind="text: $data.left"></td>
+                   <td>
+                     <span class="message-line" 
+                           data-bind="text: $data.right"></span>
+                   </td>
+                 </tr>
+               </tbody>
+             </table>
+          </div>
+          <div id="user-input-pane">
+            <textarea id="user-input"
+                      data-bind="event: { 'keydown': lineSubmit },
+                                 value: input, valueUpdate: 'keyup'"
+                      class="topcoat-textarea"></textarea>
+          </div>
+        </div>
+        <div id="users-pane" class="topcoat-textarea">
+          <ul id="users-list"
+              data-bind="foreach: ko.unwrap($root.activeTab().sortedUsers || [])">
+            <li>
+              <span class="status-sym"
+                    data-bind="text: status"></span>
+              <span class=""
+                    data-bind="text: name"></span>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
     <script src="knockout.js" type="text/javascript"></script>

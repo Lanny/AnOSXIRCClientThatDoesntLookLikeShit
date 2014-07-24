@@ -2,6 +2,7 @@ var root
 
 ;(function() {
   var irc = require('irc'),
+    gui = require('nw.gui'),
     VERSION = '0.0.1',
     STATUS_POWER_RANKINGS = {
       '@': 0,
@@ -46,6 +47,7 @@ var root
     self.networks = ko.observableArray()
     self.input = ko.observable()
     self.lines = ko.observableArray()
+    self.activeTabTitle = ko.observable('Not Connected')
     self.defaultNick = "mibiot"
 
     self.inputHistory = JSON.parse(window.localStorage.inputHistory || "[]")
@@ -115,6 +117,27 @@ var root
         messageContainer = document.getElementById('messages')
 
       messageContainer.scrollTop = (messageTable.offsetHeight + 100)
+    },
+    close: function() {
+      gui.Window.get().close()
+      return false
+    },
+    min: function() {
+      gui.Window.get().minimize()
+      return false
+    },
+    max: function() {
+      gui.Window.get().maximize()
+      return false
+    },
+    mouseMove: function(e) {
+      gui.Window.get().moveBy(e.webkitMovementX, e.webkitMovementY)
+    },
+    startWindowDrag: function(_, e) {
+      window.addEventListener('mousemove', this.mouseMove)
+    },
+    endWindowDrag: function(e) {
+      window.removeEventListener('mousemove', this.mouseMove)
     }
   }
 
@@ -128,6 +151,8 @@ var root
     var n = options.host.split('.')
     while (n.length > 2) n.shift()
     self.name = n.join('.')
+    
+    self.activeTabTitle = ko.observable(self.name)
 
     // Connect to the network, we're never going to make a network and not
     // connect to it.
@@ -236,6 +261,7 @@ var root
     self.users = ko.observableArray()
     self.name = ko.observable(name)
     self.network = network
+    self.activeTabTitle = self.name
 
     self.sortedUsers = ko.computed(function() {
       return self.users().sort(function(a, b) {
