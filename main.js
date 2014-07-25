@@ -3,7 +3,7 @@ var root
 ;(function() {
   var irc = require('irc'),
     gui = require('nw.gui'),
-    VERSION = '0.0.1',
+    VERSION = '0.0.2',
     STATUS_POWER_RANKINGS = {
       '@': 0,
       '+': 1,
@@ -130,6 +130,16 @@ var root
     },
     send: universalSend,
     commands: [
+      {pattern: /^\/connect (?:irc:\/\/)?([a-zA-Z0-9.]+)(?::(\d+))?/,
+       exec: function(match, line) {
+         var opts = {
+           host: match[1],
+           port: parseInt(match[2] | '6667'),
+           nick: this.defaultNick
+         }
+
+         this.connect(opts)
+       }},
       {pattern: /^\/connect (\S+) ?(\d+)?/,
        exec: function(match, line) {
          var opts = {
