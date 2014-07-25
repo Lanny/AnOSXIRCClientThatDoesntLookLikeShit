@@ -16,15 +16,6 @@ var root
     return (function() { return obj[attr].apply(obj, arguments) })
   }
 
-  function extend(m1, m2) {
-    // WARNING: shallow
-    var clone = {}
-    for (k in m1) { clone[k] = m1[k] }
-    for (k in m2) { clone[k] = m2[k] }
-
-    return clone
-  }
-
   function only() {
     var clone = {},
       base = arguments[0]
@@ -150,6 +141,18 @@ var root
 
          this.connect(opts)
        }},
+      {pattern: /^\/(settings|prefrences)(.*)$/,
+       exec: function(match, line) {
+         if (!!match[2]) {
+           root.activeTab().lines.push({
+             left: 'X',
+             right: '/' + match[1] + ' takes no arguments!',
+             lineClass: 'error'
+           })
+         } else {
+           gui.Window.open('prefrences.html')
+         }
+       }}
     ],
     fallthroughCommand: function(line) {
       this.lines.push({
@@ -167,29 +170,11 @@ var root
         messageContainer = document.getElementById('messages')
 
       messageContainer.scrollTop = (messageTable.offsetHeight + 100)
-    },
-    close: function() {
-      gui.Window.get().close()
-      return false
-    },
-    min: function() {
-      gui.Window.get().minimize()
-      return false
-    },
-    max: function() {
-      gui.Window.get().maximize()
-      return false
-    },
-    mouseMove: function(e) {
-      gui.Window.get().moveBy(e.webkitMovementX, e.webkitMovementY)
-    },
-    startWindowDrag: function(_, e) {
-      window.addEventListener('mousemove', this.mouseMove)
-    },
-    endWindowDrag: function(e) {
-      window.removeEventListener('mousemove', this.mouseMove)
     }
   }
+  // Mix in the stuff shared with other window VMs (e.x. OS buttons)
+  console.log(utils)
+  WindowMVM.prototype = utils.extend(utils.baseWindowVM, WindowMVM.prototype)
 
   function NetworkMVM(windowModel, options) {
     var self = this
@@ -233,18 +218,6 @@ var root
       {pattern: /^\/join (\S+)/,
        exec: function(match, line) {
          this.join(match[1])
-       }},
-      {pattern: /^\/settings(.*)$/,
-       exec: function(match, line) {
-         if (!!match[1]) {
-           root.activeTab().lines.push({
-             left: 'X',
-             right: '/settings takes no arguments!',
-             lineClass: 'error'
-           })
-         } else {
-           gui.Window.open('prefrences.html')
-         }
        }},
       {pattern: /^\/msg.*/,
        exec: function(match, line) {

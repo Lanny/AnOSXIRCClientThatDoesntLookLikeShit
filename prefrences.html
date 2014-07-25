@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>AOICTDLLS - Prefrences</title>
+    <link href="css/topcoat-desktop-dark.min.css" 
+          rel="stylesheet" type="text/css" />
+    <link href="css/style.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <div id="faux-title-bar"
+         data-bind="event: {mousedown: $root.startWindowDrag,
+                            mouseup: $root.endWindowDrag}">
+        <div class="os-button close" data-bind="click: $root.close"></div>
+        <div class="os-button minimize" data-bind="click: $root.min"></div>
+        <div class="os-button maximize" data-bind="click: $root.max"></div>
+      <h1 id="window-title">Prefrences</h1>
+    </div>
+    <div id="content-wrapper">
+      <div>
+        <h3>Custom Stylesheets</h3>
+        <ul data-bind="foreach: $root.prefs.stylesheets">
+          <li>
+            <span data-bind="$data"></span>
+            <div>Delete</div>
+          </li>
+        </ul>
+        <div>Add Stylesheet</div>
+      </div>
+      <label>
+        <span class="label-left">
+          Command History Length
+        </span>
+        <span class="label-right">
+          <input type="number" data-bind="value: prefs.commandHistoryLength" />
+        </span>
+      </label>
+    </div>
+    <script src="knockout.js" type="text/javascript"></script>
+    <script src="utils.js" type="text/javascript"></script>
+    <script src="prefrences.js" type="text/javascript"></script>
+  </body>
+</html>
