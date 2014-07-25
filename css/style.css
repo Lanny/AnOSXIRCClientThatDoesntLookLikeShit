@@ -83,12 +83,12 @@ ul {
   width: 9.5rem;
   height: 100%;
   margin-left: .5rem;
+  overflow: auto;
 }
 
 #users-list {
   margin: 0;
   padding: 0;
-  overflow: auto;
 }
 
 #messages {
