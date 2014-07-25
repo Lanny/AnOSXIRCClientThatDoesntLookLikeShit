@@ -61,6 +61,12 @@ var root
         return command.exec.call(this, match, line)
       }
     }
+
+    if (!cascaded) {
+      // We've reached the end without finding a valid command, use this
+      // tab's fallthrough
+      this.fallthroughCommand(line)
+    }
   }
 
   function WindowMVM() {
@@ -115,6 +121,7 @@ var root
         return true
       }
     },
+    send: universalSend,
     commands: [
       {pattern: /^\/connect (\S+) ?(\d+)?/,
        exec: function(match, line) {
@@ -127,7 +134,13 @@ var root
          this.connect(opts)
        }}
     ],
-    send: universalSend,
+    fallthroughCommand: function(line) {
+      this.lines.push({
+        left: '*',
+        right: 'Not connected to any network, try `/connect server [port]`',
+        lineClass: 'notice error'
+      })
+    },
     setActiveTab: function(tab) {
       console.log(this)
       root.activeTab(tab)
@@ -203,6 +216,18 @@ var root
       {pattern: /^\/join (\S+)/,
        exec: function(match, line) {
          this.join(match[1])
+       }},
+      {pattern: /^\/settings(.*)$/,
+       exec: function(match, line) {
+         if (!!match[1]) {
+           root.activeTab().lines.push({
+             left: 'X',
+             right: '/settings takes no arguments!',
+             lineClass: 'error'
+           })
+         } else {
+           gui.Window.open('prefrences.html')
+         }
        }}
     ],
     onNames: function(channel, nicks) {
