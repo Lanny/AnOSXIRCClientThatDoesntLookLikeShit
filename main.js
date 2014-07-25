@@ -48,24 +48,31 @@ var root
     // executing this first command the submitted line matches (e.x. if both
     // the channel and network match `/join #foo` then the network handler will
     // be the one executed)
+    var matchFound = false
+
     if (this.parentLevel) {
-      this.parentLevel.send(line, true)
+      matchFound = this.parentLevel.send(line, true)
     }
 
-    var match = null
+    if (!matchFound) {
+      var match = null
 
-    for (var i=0; i<this.commands.length; i++) {
-      var command = this.commands[i]
-      match = line.match(command.pattern)
-      if (match) {
-        return command.exec.call(this, match, line)
+      for (var i=0; i<this.commands.length; i++) {
+        var command = this.commands[i]
+        match = line.match(command.pattern)
+        if (match) {
+          command.exec.call(this, match, line)
+          return true
+        }
       }
-    }
 
-    if (!cascaded) {
-      // We've reached the end without finding a valid command, use this
-      // tab's fallthrough
-      this.fallthroughCommand(line)
+      if (cascaded) {
+        return false
+      } else {
+        // We've reached the end without finding a valid command, use this
+        // tab's fallthrough
+        this.fallthroughCommand(line)
+      }
     }
   }
 
@@ -132,7 +139,7 @@ var root
          }
 
          this.connect(opts)
-       }}
+       }},
     ],
     fallthroughCommand: function(line) {
       this.lines.push({
@@ -227,6 +234,27 @@ var root
            })
          } else {
            gui.Window.open('prefrences.html')
+         }
+       }},
+      {pattern: /^\/msg.*/,
+       exec: function(match, line) {
+         var match = line.match(/^\/msg (\S+) (.+)$/),
+           target = match[1],
+           msg = match[2]
+
+         if (!(target && msg)) {
+            root.activeTab().lines.push({
+             left: '*',
+             right: 'Invalid syntax, usage: `/msg user message`',
+             lineClass: 'notice error'
+           })
+         } else {
+           this.client.say(target, msg)
+           root.activeTab().lines.push({
+             left: target + '<-',
+             right: msg,
+             lineClass: 'message user-msg sent'
+           })
          }
        }}
     ],
