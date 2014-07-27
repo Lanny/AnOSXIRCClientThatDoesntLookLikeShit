@@ -69,6 +69,13 @@ hr {
   height: 100%;
   width: 10rem;
   position: relative;
+  text-overflow:ellipsis;
+}
+
+#networks-pane li span {
+  text-overflow: ellipsis;
+  display: block;
+  overflow: hidden;
 }
 
 #context-area {
