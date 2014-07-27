@@ -1,9 +1,16 @@
 var utils = {}
 
 ;(function() {
-  var gui = require('nw.gui')
+  var gui = require('nw.gui'),
+    defaultSettings = {
+      defaultNick: 'mibiot',
+      commandHistoryLength: 50,
+      autoNetworks: [],
+      stylesheets: [],
+    }
 
-  utils.baseWindowVM = {
+
+  var baseWindowVM = {
     close: function() {
       gui.Window.get().close()
       return false
@@ -27,7 +34,7 @@ var utils = {}
     }
   }
 
-  utils.extend = function(m1, m2) {
+  function extend(m1, m2) {
     // WARNING: shallow
     var clone = {}
     for (k in m1) { clone[k] = m1[k] }
@@ -35,4 +42,14 @@ var utils = {}
 
     return clone
   }
+
+  function getWorkingSettings() {
+    var settings = JSON.parse(localStorage['settings'] || '{}')
+
+    return extend(defaultSettings, settings)
+  }
+
+  utils.baseWindowVM = baseWindowVM
+  utils.extend = extend
+  utils.getWorkingSettings = getWorkingSettings
 })()

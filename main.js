@@ -73,7 +73,6 @@ var root
     self.input = ko.observable()
     self.lines = ko.observableArray()
     self.activeTabTitle = ko.observable('Not Connected')
-    self.defaultNick = "mibiot"
     self.parentLevel = null
 
     self.inputHistory = JSON.parse(window.localStorage.inputHistory || "[]")
@@ -126,7 +125,7 @@ var root
          var opts = {
            host: match[1],
            port: parseInt(match[2] | '6667'),
-           nick: this.defaultNick
+           nick: utils.getWorkingSettings().defaultNick
          }
 
          this.connect(opts)
@@ -136,7 +135,7 @@ var root
          var opts = {
            host: match[1],
            port: parseInt(match[2] | '6667'),
-           nick: this.defaultNick
+           nick: utils.getWorkingSettings().defaultNick
          }
 
          this.connect(opts)
@@ -150,7 +149,7 @@ var root
              lineClass: 'error'
            })
          } else {
-           gui.Window.open('prefrences.html')
+           gui.Window.open('prefrences.html', {width: 420, height: 500})
          }
        }}
     ],

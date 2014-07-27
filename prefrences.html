@@ -5,6 +5,7 @@
     <link href="css/topcoat-desktop-dark.min.css" 
           rel="stylesheet" type="text/css" />
     <link href="css/style.css" rel="stylesheet" type="text/css" />
+    <link href="css/prefrences.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
     <div id="faux-title-bar"
@@ -16,24 +17,65 @@
       <h1 id="window-title">Prefrences</h1>
     </div>
     <div id="content-wrapper">
-      <div>
-        <h3>Custom Stylesheets</h3>
-        <ul data-bind="foreach: $root.prefs.stylesheets">
-          <li>
-            <span data-bind="$data"></span>
-            <div>Delete</div>
-          </li>
-        </ul>
-        <div>Add Stylesheet</div>
+      <div id="notices" data-bind="foreach: $root.notices">
+        <div class="notice" 
+             data-bind="text: $data.text, css: {transparent: $data.fading()}">
+        </div>
       </div>
       <label>
-        <span class="label-left">
-          Command History Length
-        </span>
-        <span class="label-right">
-          <input type="number" data-bind="value: prefs.commandHistoryLength" />
-        </span>
+        <span class="label">Default Nickname</span>
+        <input type="text" class="topcoat-text-input--large"
+               data-bind="value: prefs.defaultNick" />
       </label>
+
+      <span class="label">
+        <span>Autoconnect Networks</span>
+        <div class="topcoat-button"
+             data-bind="click: $root.addAutoconnectNetwork">
+          Add
+        </div>
+      </span>
+      <ul class="top-level-list"
+          data-bind="foreach: $root.prefs.autoNetworks">
+        <li>
+          <input type="text" placeholder="irc.example.net:6667"
+                 class="topcoat-text-input incog-input"
+                 data-bind="value: $data.addr" />
+          <div class="topcoat-button--quiet hidden-btn">
+            Delete
+          </div>
+          <div class="topcoat-button--quiet hidden-btn"
+               data-bind="$root.addCommand">
+            Add Command
+          </div>
+          <ul data-bind="foreach: $data.startCommands()">
+            <li>
+              <span class="auto-command" data-bind="text: $data"></span>
+            </li>
+          </ul>
+        </li>
+      </ul>
+
+      <h3>Custom Stylesheets</h3>
+      <ul data-bind="foreach: $root.prefs.stylesheets">
+        <li>
+          <span data-bind="$data"></span>
+          <div>Delete</div>
+        </li>
+      </ul>
+      <div>Add Stylesheet</div>
+
+      <label>
+        <span class="label">Command History Length</span>
+        <input type="number" class="topcoat-text-input--large"
+               data-bind="value: prefs.commandHistoryLength" />
+      </label>
+
+      <hr />
+      <div class="topcoat-button--large--cta"
+           data-bind="click: $root.savePrefs">
+        Save
+      </div>
     </div>
     <script src="knockout.js" type="text/javascript"></script>
     <script src="utils.js" type="text/javascript"></script>

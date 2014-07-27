@@ -1,0 +1,61 @@
+h3 {
+  margin-top: 0;
+}
+
+ul { margin: 0; }
+.top-level-list { margin-top: .5rem; }
+li { margin-bottom: .25rem }
+
+#content-wrapper {
+  padding: .5rem;
+  box-sizing: border-box;
+  position: relative;
+}
+
+ul .hidden-btn { visibility: hidden; }
+li:hover .hidden-btn { visibility: visible; }
+
+ul li:not(:hover) .incog-input:not(:focus) {
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+li:hover .incog-input { background-color: auto; }
+
+#notices {
+  position: absolute;
+  width: 0;
+  right: 0; top: 0; bottom: 0;
+  overflow: visible;
+  z-index: 2;
+}
+
+.notice {
+  color: white;
+  background-color: rgba(0, 0, 0, .5);
+  width: 15rem;
+  padding: 1rem;
+  border-radius: .5rem;
+  float: right;
+  clear: both;
+  margin-bottom: .25rem;
+  opacity: 1;
+  transition: opacity 1s;
+  
+}
+.transparent {
+  transition: opacity 1s;
+  opacity: 0;
+}
+
+.label {
+  margin-top: .75rem;
+  display: block;
+}
+
+.label .topcoat-button { margin-left: 1rem; }
+
+.label:first-child {
+  margin-top: 0;
+}
+

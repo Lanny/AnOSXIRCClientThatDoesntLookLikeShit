@@ -30,6 +30,12 @@ ul {
   padding-left: 1rem;
 }
 
+hr {
+  border-width: 0;
+  border-bottom: 1px solid;
+  color: #A0A7AF;
+}
+
 #faux-title-bar {
   height: 2rem;
   width: 100%;
