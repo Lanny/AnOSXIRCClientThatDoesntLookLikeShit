@@ -7,7 +7,10 @@ var root
     STATUS_POWER_RANKINGS = {
       '@': 0,
       '+': 1,
-      '': 2
+      '': 2 },
+    FRIENDLY_SOCK_MSGS = {
+      'ENOTFOUND': 'Remote server not found, maybe you mistyped the server ' +
+        'details.'
     }
 
   function ensureMethod(obj, attr) {
@@ -182,6 +185,7 @@ var root
     self.lines = ko.observableArray()
     self.nick = ko.observable(options.nick)
     self.parentLevel = windowModel
+    self.alive = ko.observable(true)
 
     var n = options.host.split('.')
     while (n.length > 2) n.shift()
@@ -191,7 +195,22 @@ var root
 
     // Connect to the network, we're never going to make a network and not
     // connect to it.
-    self.client = new irc.Client(options.host, options.nick, options)
+    var workingOptions = utils.extend(options, {
+      autoConnect: false, showErrors: true })
+    
+    self.client = new irc.Client(options.host, options.nick, workingOptions)
+    self.client.connect()
+    self.client.conn.on('error', function(err) {
+      self.alive(false)
+
+      var msg = FRIENDLY_SOCK_MSGS[err.code] || 'Socket error: ' + err.code
+      self.lines.push({
+        left: '*',
+        right: msg,
+        lineClass: 'error system-error network-error'
+      })
+    })
+
     self.client.on('notice', ensureMethod(self, 'onNotice'))
     self.client.on('motd', ensureMethod(self, 'onMotd'))
     self.client.on('join', ensureMethod(self, 'onJoin'))
