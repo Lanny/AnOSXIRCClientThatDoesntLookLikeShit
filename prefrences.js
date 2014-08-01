@@ -1,8 +1,16 @@
 ;(function() {
+  function wrapAutoNetwork(network) {
+    network.addr = ko.observable(network.addr)
+    network.startCommands = ko.observableArray(network.startCommands)
+    return network
+  }
+
   function PrefrencesVM(initValues) {
     this.prefs = {
       defaultNick: ko.observable(initValues.defaultNick),
-      autoNetworks: ko.observableArray(initValues.autoNetworks),
+      newTabOnPM: ko.observable(initValues.newTabOnPM),
+      autoNetworks: ko.observableArray(
+        initValues.autoNetworks.map(wrapAutoNetwork)),
       stylesheets: ko.observableArray(initValues.stylesheets),
       commandHistoryLength: ko.observable(initValues.commandHistoryLength)
     }
@@ -36,7 +44,9 @@
     savePrefs: function() {
       var serPrefs = {
         defaultNick: this.prefs.defaultNick(),
+        newTabOnPM: this.prefs.newTabOnPM(),
         autoNetworks: this.prefs.autoNetworks().map(function(e) {
+          console.log(e)
           return {
             addr: e.addr(),
             startCommands: e.startCommands()
