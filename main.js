@@ -216,6 +216,7 @@ var root
     self.client.on('join', ensureMethod(self, 'onJoin'))
     self.client.on('part', ensureMethod(self, 'onPart'))
     self.client.on('names', ensureMethod(self, 'onNames'))
+    self.client.on('pm', ensureMethod(self, 'onPM'))
     self.client.on('ctcp-version', ensureMethod(self, 'onVersion'))
     self.client.on('raw', function(e) { 
       try {
@@ -285,6 +286,25 @@ var root
         right: motd,
         lineClass: 'notice'
       })
+    },
+    onPM: function(nick, text, message) {
+      var tab = getChan(this, nick)
+      if (tab === null) {
+        if (utils.getWorkingSettings().newTabOnPM) {
+          tab = new UserVM(this, nick)
+          this.channels.push(tab)
+          tab.onPrivMessage(nick, text, message)
+        } else {
+          var activeTab = this.windowModel.activeTab()
+          activeTab.lines.push({
+            left: nick + '->',
+            right: text,
+            lineClass: 'message user-msg recv'
+          })
+        }
+      } else {
+        tab.onPrivMessage(nick, text, message)
+      }
     },
     onJoin: function(channel, nick, message) {
       var chan = getChan(this, channel)
@@ -384,6 +404,25 @@ var root
        }}
     ]
   }
+
+  function UserVM(network, name) {
+    var self = this
+    self.lines = ko.observableArray()
+    self.name = ko.observable(name)
+    self.network = network
+    self.activeTabTitle = self.name
+    self.parentLevel = network
+
+  }
+  UserVM.prototype = utils.extend(ChannelMVM.prototype, {
+    onPrivMessage: function(nick, text, message) {
+      this.lines.push({
+        left: nick,
+        right: text,
+        lineClass: 'message user-message'
+      })
+    }
+  })
 
   root = new WindowMVM()
   ko.applyBindings(root)

@@ -7,6 +7,7 @@ var utils = {}
       commandHistoryLength: 50,
       autoNetworks: [],
       stylesheets: [],
+      newTabOnPM: true
     }
 
 
