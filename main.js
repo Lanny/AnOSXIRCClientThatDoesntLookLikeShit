@@ -84,6 +84,13 @@ var root
     // A "tab" can be a network, channel, or null when none of either are 
     // available.
     self.activeTab = ko.observable(self)
+
+    // Connect to the user defined "auto networks"
+    var settings = utils.getWorkingSettings()
+    for (var i=0; i<settings.autoNetworks.length; i++) {
+      var aN = settings.autoNetworks[i]
+      this.send('/connect ' + aN.addr)
+    }
   }
   WindowMVM.prototype = {
     connect: function(options) {
@@ -175,7 +182,6 @@ var root
     }
   }
   // Mix in the stuff shared with other window VMs (e.x. OS buttons)
-  console.log(utils)
   WindowMVM.prototype = utils.extend(utils.baseWindowVM, WindowMVM.prototype)
 
   function NetworkMVM(windowModel, options) {
@@ -188,8 +194,12 @@ var root
     self.alive = ko.observable(true)
 
     var n = options.host.split('.')
-    while (n.length > 2) n.shift()
-    self.name = n.join('.')
+    if (n.length < 2) {
+      self.name = 'Unknown'
+    } else {
+      while (n.length > 2) n.shift()
+      self.name = n.join('.')
+    }
     
     self.activeTabTitle = ko.observable(self.name)
 

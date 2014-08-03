@@ -48,7 +48,8 @@
           <input type="text" placeholder="irc.example.net:6667"
                  class="topcoat-text-input incog-input"
                  data-bind="value: $data.addr" />
-          <div class="topcoat-button--quiet hidden-btn">
+          <div class="topcoat-button--quiet hidden-btn"
+               data-bind="click: $root.deleteAutoNetwork">
             Delete
           </div>
           <div class="topcoat-button--quiet hidden-btn"

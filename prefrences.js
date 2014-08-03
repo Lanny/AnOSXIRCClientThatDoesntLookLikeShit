@@ -46,7 +46,6 @@
         defaultNick: this.prefs.defaultNick(),
         newTabOnPM: this.prefs.newTabOnPM(),
         autoNetworks: this.prefs.autoNetworks().map(function(e) {
-          console.log(e)
           return {
             addr: e.addr(),
             startCommands: e.startCommands()
@@ -58,9 +57,12 @@
       localStorage.settings = JSON.stringify(serPrefs)
       this.domNotice("Settings saved successfully!")
       console.log('hai?')
+    },
+    deleteAutoNetwork: function(autoNetwork) {
+      prefRoot.prefs.autoNetworks.remove(autoNetwork)
     }
   })
 
-  prefRoot = new PrefrencesVM(utils.getWorkingSettings())
+  var prefRoot = new PrefrencesVM(utils.getWorkingSettings())
   ko.applyBindings(prefRoot)
 })()
