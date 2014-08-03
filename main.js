@@ -227,14 +227,10 @@ var root
     self.client.on('part', ensureMethod(self, 'onPart'))
     self.client.on('names', ensureMethod(self, 'onNames'))
     self.client.on('pm', ensureMethod(self, 'onPM'))
+    self.client.on('nick', ensureMethod(self, 'onNick'))
     self.client.on('ctcp-version', ensureMethod(self, 'onVersion'))
-    self.client.on('raw', function(e) { 
-      try {
-        console.log(e)
-      } catch (e) {
-        alert("wtf mate?" + console)
-      } 
-    })
+    self.client.on('error', ensureMethod(self, 'onError'))
+    self.client.on('raw', ensureMethod(self, 'onRaw'))
   }
   NetworkMVM.prototype = {
     join: function(channelName) {
@@ -247,6 +243,16 @@ var root
       {pattern: /^\/join (\S+)/,
        exec: function(match, line) {
          this.join(match[1])
+       }},
+      {pattern: /^\/nick (.+)/,
+       exec: function(match, line) {
+         //var oldNick = this.nick()
+
+         this.client.send('NICK', match[1])
+
+         //for (var i=0; i<this.channels().length; i++) {
+         //  this.channels()[i].onNickChange(oldNick, match[1])
+         //}
        }},
       {pattern: /^\/msg.*/,
        exec: function(match, line) {
@@ -270,14 +276,26 @@ var root
          }
        }}
     ],
+    onRaw: function(e) {
+      if (e.command == 'NICK') {
+        // The `nick` event doesn't emit for us changing our own nick, so we'll
+        // just go ahead and fake it here.
+        this.onNick(e.nick, e.args[0], e)
+      }
+      try {
+        console.log(e)
+      } catch (e) {
+        alert("wtf mate?" + console)
+      } 
+    },
     onNames: function(channel, nicks) {
       var chan = getChan(this, channel),
         nickArr = []
 
       for (nick in nicks) {
         nickArr.push({
-          name: nick,
-          status: nicks[nick]
+          name: ko.observable(nick),
+          status: ko.observable(nicks[nick])
         })
       }
 
@@ -296,6 +314,17 @@ var root
         right: motd,
         lineClass: 'notice'
       })
+    },
+    onNick: function (oldnick, newnick, channels, message) {
+      var chans = this.channels()
+
+      for (var i=0; i<chans.length; i++) {
+        chans[i].onNickChange(oldnick, newnick, message)
+      }
+
+      if (oldnick == this.nick()) {
+        this.nick(newnick)
+      }
     },
     onPM: function(nick, text, message) {
       var tab = getChan(this, nick)
@@ -363,6 +392,10 @@ var root
 
       this.client.ctcp(from, 'VERSION', 'AOICTDLLS (An OSX IRC Client That '
         + 'Doesn\'t Look Like Shit) ' + VERSION)
+    },
+    onError: function(message) {
+      console.error(message)
+      return false
     }
   }
 
@@ -392,6 +425,17 @@ var root
         right: text,
         lineClass: 'message'
       })
+    },
+    onNickChange: function(oldNick, newNick, message) {
+      var users = this.users(),
+        user = users.filter(function(e) { return e.name() == oldNick })[0]
+
+      console.log('here!')
+      console.log(users)
+      console.log(user)
+      if (!!user) {
+        user.name(newNick)
+      }
     },
     send: universalSend,
     commands: [
@@ -431,6 +475,11 @@ var root
         right: text,
         lineClass: 'message user-message'
       })
+    },
+    onNickChange: function(oldNick, newNick, message) {
+      if (oldNick == this.name()) {
+        this.name(newNick)
+      }
     }
   })
 
